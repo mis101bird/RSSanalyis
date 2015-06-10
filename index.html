@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>RSS catcher</title>
+        <!-- Jquery mobile 程式庫和Themeroller-https://themeroller.jquerymobile.com/ -->
+        <link rel="stylesheet" href="themes/RSS.min.css" />
+        <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <!-- -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script>
+            $(function () {
+                //$('#search').keypress(function() {...} is also fine.
+                $("#search").bind("keypress", {}, function () { //
+
+                    var theName = $.trim($("#search").val()); //get the url in searching box
+                    console.log(theName.length);
+                    if (theName.length > 0)
+                    {
+                        $.ajax({
+                            type: "GET", 
+                            url: "RSS",
+                            data: ({search: theName}),
+                            cache: false,
+                            dataType: "text",
+                            success: onSuccess //call onSuccess method
+                        });
+                    }
+                });
+
+                $("#page2").ajaxError(function (event, request, settings, exception) { //Error calling
+                    $("#page2").html("Error Calling: " + settings.url + "<br />HTTP Code: " + request.status);
+                });
+
+                function onSuccess(data)
+                {
+
+                    var obj = JSON.parse(data); //String to JSON
+                    console.log(obj);
+                    for (item in obj) {
+                        console.log(item);
+                        $('#page2') 
+                        .append($("<li></li>") //append 加後面
+                        .attr("data-role","list-divider")
+                        .text(obj[item].title)); 
+                        $('#page2')
+                        .append($("<li></li>")
+                        .text("title: " + obj[item].title )); 
+                        $('#page2')
+                        .append($("<li></li>")
+                        .text("category: " + obj[item].category )); 
+                        $('#page2')
+                        .append($("<li></li>")
+                        .text("Date: " + obj[item].pubDate )); 
+                
+                        /* Use javascript but the same effect
+                        document.getElementById("page2").innerHTML +=
+                                "<li data-role='list-divider'>" + obj[item].title + "</li>" +
+                                "<li>title: " + obj[item].title + "</li>" +
+                                "<li>category: " + obj[item].category + "</li>" +
+                                        "<li><a href='" + obj[item].link + "'>" + obj[item].link + "</a></li>" +
+                                        "<li>description: " + obj[item].description + "</li>" +
+                                "<li>Date: " + obj[item].pubDate + "</li>";
+                        */
+                    }
+                    $('#page2').listview("refresh"); //refresh the listview part so that mobile css style can appear! http://demos.jquerymobile.com/1.0/docs/forms/docs-forms.html
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <div data-role="page" data-theme="a"> <!-- Use the customer theme named "a" -->
+            <div data-role="header" data-position="inline">
+                <h1>RSS news</h1>
+            </div>
+            <div data-role="content" data-theme="a">
+                <p>Please input your RSS URL :</p>
+                <div data-role="fieldcontain" data-type="horizontal">
+                    <input type="search" name="search" id="search">
+                </div>
+                <ul data-role="listview" data-inset="true" id="page2">
+
+                </ul>
+
+            </div>
+        </div>
+    </body>
+</html>
